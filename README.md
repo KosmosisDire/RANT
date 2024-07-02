@@ -1,1 +1,1 @@
-# Yet Another Robotics Middleman
+# RANT: Robotics Action Networking Toolkit
