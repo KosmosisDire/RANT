@@ -1,0 +1,1 @@
+dotnet publish /p:PublishSingleFile=true /p:DebugType=None /p:DebugSymbols=false --self-contained --configuration Release --output ./
