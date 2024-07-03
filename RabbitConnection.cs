@@ -27,7 +27,7 @@ public class RabbitConnection
 
     public void Publish(string queueName, ReadOnlyMemory<byte> data)
     {
-        channel.QueueDeclare(queueName);
+        channel.QueueDeclare(queueName, false, false, false);
         channel.BasicPublish(string.Empty, queueName, null, data);
     }
 
@@ -41,7 +41,7 @@ public class RabbitConnection
     public EventingBasicConsumer Subscribe(string queueName)
     {
         var consumer = new EventingBasicConsumer(channel);
-        channel.QueueDeclare(queueName);
+        channel.QueueDeclare(queueName, false, false, false);
         channel.BasicConsume(queueName, true, consumer);
         return consumer;
     }

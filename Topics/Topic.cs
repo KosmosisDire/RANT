@@ -18,6 +18,7 @@ public class Topic<T>
     protected static readonly XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
     private static readonly XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
     protected static readonly XmlSerializer serializer = new XmlSerializer(typeof(T));
+    protected static string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
     public readonly string name;
 
     public Topic(string name)
@@ -110,6 +111,13 @@ public class Topic<T>
         var info = new TopicSubInfo();
         Rant.Connection.Subscribe(name, (b) => 
         {
+            var str = Encoding.UTF8.GetString(b);
+            
+            if (str.StartsWith(_byteOrderMarkUtf8))
+            {
+                str = str.Remove(0, _byteOrderMarkUtf8.Length);
+            }
+
             if (info.lastReceivedTime != DateTime.MinValue)
             {
                 info.hz = (float)(1f / (DateTime.UtcNow - info.lastReceivedTime).TotalSeconds);
@@ -117,16 +125,24 @@ public class Topic<T>
 
             if (measureLatency)
             {
-                var obj = Deserialize(b);
-                if (obj is IMessage msg)
+                try
                 {
-                    info.latencyMs = (float)(DateTime.UtcNow - msg.Timestamp).TotalMilliseconds;
+                    var doc = new XmlDocument();
+                    doc.LoadXml(str);
+                    var timestamp = doc.GetElementsByTagName("Timestamp")?[0]?.InnerText;
+                    if (timestamp is not null)
+                        info.latencyMs = (float)(DateTime.UtcNow - DateTime.Parse(timestamp).ToUniversalTime()).TotalMilliseconds;
+                }
+                catch (Exception ex)
+                {
+                    info.latencyMs = -1;
+                    Console.WriteLine(ex);
                 }
             }
 
             info.lastReceivedTime = DateTime.UtcNow;
 
-            callback(Encoding.UTF8.GetString(b));
+            callback(str);
         });
         return info;
     }

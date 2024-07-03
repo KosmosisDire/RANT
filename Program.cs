@@ -85,6 +85,20 @@ public class RantRootCliCommand
                 Console.WriteLine(string.Join("\n", Rant.GetAllTopicNames()));
             }
         }
+
+        [CliCommand(Description = "print all data published to the given topic")]
+        public class EchoCommand
+        {
+            [CliArgument(Description = "topic name", Required = true)]
+            public string Topic { get; set; }
+
+            public void Run(CliContext context)
+            {
+                var topic = new Topic<object>(Topic);
+                topic.BeginEcho();
+                Console.ReadKey();
+            }
+        }
     }
 
 }
