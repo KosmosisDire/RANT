@@ -1,8 +1,7 @@
-namespace RantCore;
+namespace RantCore.Topics;
 
-public class FieldTopic<T>
+public class FieldTopic<T> : SubTopicType<T>
 {
-    protected Topic<T> internalTopic;
     protected T? _lastValue;
     public T? Value
     {
@@ -14,22 +13,21 @@ public class FieldTopic<T>
         }
     }
 
-    public FieldTopic(string name, T? defaultValue = default)
+    public FieldTopic(string name, T? defaultValue = default) : base(name)
     {
-        internalTopic = new Topic<T>(name);
         _lastValue = defaultValue;
         Value = defaultValue;
     }
 
     public void SetValue(T value)
     {
-        internalTopic.Publish(value);
+        InternalTopic.Publish(value);
         _lastValue = value;
     }
 
     public T? GetValue()
     {
-        var val = internalTopic.GetLatestMessage();
+        var val = InternalTopic.GetLatestMessage();
         if (val is null || Equals(val, default(T?)))
         {
             val = _lastValue ?? default;
@@ -38,8 +36,4 @@ public class FieldTopic<T>
         return val;
     }
 
-    public void BeginEcho()
-    {
-        internalTopic.BeginEcho((subInfo, x) => $"Rate: {subInfo.hz}Hz\nLatency: {subInfo.latencyMs}ms\nField Value Modified:\n{x}\n\n");
-    }
 }

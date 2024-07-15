@@ -83,11 +83,11 @@ public static class MessageBuilder
         }
 
         var builder = new StringBuilder();
-        builder.AppendLine("using Rant.Messages;");
-        addedNamespaces.Add("Rant.Messages");
-        builder.AppendLine("");
 
         var defType = "record struct";
+        var isGeneric = false;
+        var genericName = "";
+
         // ----- first pass to find metadata -----
         for (int i = 0; i < lines.Count; i++)
         {
@@ -104,6 +104,12 @@ public static class MessageBuilder
                         break;
                     }
                     defType = name;
+                    SkipLine(i);
+                    break;
+
+                case "generic":
+                    isGeneric = true;
+                    genericName = name;
                     SkipLine(i);
                     break;
 
@@ -125,7 +131,7 @@ public static class MessageBuilder
                         LogWarning($"Msg: {messageName} - Skipping duplicate namespace {name}");
                         break;
                     }
-                    builder.AppendLine($"using {name};\n");
+                    builder.AppendLine($"using {name}.Messages;\n");
                     addedNamespaces.Add(name);
                     SkipLine(i);
                     break;
@@ -143,7 +149,7 @@ public static class MessageBuilder
                             break;
                         }
                         
-                        builder.AppendLine($"using {usingJoined};\n");
+                        builder.AppendLine($"using {usingJoined}.Messages;\n");
                         addedNamespaces.Add(usingJoined);
 
                         types[i] = splitByType[^1]; // assign the raw type back
@@ -152,8 +158,17 @@ public static class MessageBuilder
             }
 
         }
+        
+        // use default messages if they were not added
+        var defaultUsing = "RantCore.Messages";
+        if (!addedNamespaces.Contains(defaultUsing))
+        {
+            builder.AppendLine($"using {defaultUsing};");
+            addedNamespaces.Add(defaultUsing);
+            builder.AppendLine("");
+        }
 
-        builder.AppendLine($"public {defType} {messageName} : IMessage");
+        builder.AppendLine($"public {defType} {messageName}{(isGeneric ? '<' + genericName + '>' : "")} : IMessage");
         builder.AppendLine("{");
         builder.AppendLine("    public DateTime Timestamp { get; set; } = DateTime.UtcNow;");
         builder.AppendLine("");
@@ -292,7 +307,7 @@ public static class MessageBuilder
         var tasks = new List<Task>();
         foreach (var folder in folders)
         {
-            var folderName = Path.GetFileNameWithoutExtension(folder);
+            var folderName = Path.GetFileNameWithoutExtension(folder).ToLower();
             if (string.IsNullOrEmpty(folder) || !messageFolderNames.Contains(folderName))
             {
                 continue;

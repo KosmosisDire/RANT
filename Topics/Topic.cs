@@ -1,9 +1,8 @@
-using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using RantCore.Messages;
-namespace RantCore;
+namespace RantCore.Topics;
 
 public class TopicSubInfo()
 {
@@ -12,8 +11,15 @@ public class TopicSubInfo()
     public DateTime lastReceivedTime = DateTime.MinValue;
 }
 
+public struct TopicType
+{
+    public string topicName;
+    public string topicType;
+}
+
 public class Topic<T>
 {
+
     protected static readonly XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
     protected static readonly XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
     private static readonly XmlSerializerNamespaces ns = new XmlSerializerNamespaces();

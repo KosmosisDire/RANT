@@ -1,6 +1,6 @@
-using RantCore.Messages;
-
 namespace Examples.Messages;
+
+using RantCore.Messages;
 
 public record struct Test : IMessage
 {

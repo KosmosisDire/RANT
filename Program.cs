@@ -1,4 +1,5 @@
 ﻿using RantCore;
+using RantCore.Topics;
 using DotMake.CommandLine;
 using Examples.Messages;
 await Cli.RunAsync<RantRootCliCommand>(args);
@@ -97,6 +98,35 @@ public class RantRootCliCommand
                 var topic = new Topic<object>(Topic);
                 topic.BeginEcho();
                 Console.ReadKey();
+            }
+        }
+
+        [CliCommand(Description = "publish a string onto a given topic")]
+        public class PublishCommand
+        {
+            [CliArgument(Description = "topic name", Required = true)]
+            public string Topic { get; set; }
+
+            [CliArgument(Description = "message contents", Required = true)]
+            public string Contents { get; set; }
+
+            public void Run(CliContext context)
+            {
+                var topic = new Topic<object>(Topic);
+                topic.Publish(Contents);
+            }
+        }
+
+        [CliCommand(Description = "Trigger a given topic")]
+        public class TriggerCommand
+        {
+            [CliArgument(Description = "topic name", Required = true)]
+            public string Topic { get; set; }
+
+            public void Run(CliContext context)
+            {
+                var topic = new Trigger(Topic);
+                topic.Invoke();
             }
         }
     }
