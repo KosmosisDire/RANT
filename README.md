@@ -1,1 +1,1 @@
-# RANT: Robotics Action Networking Toolkit
+# RANT: Robotics Automation Networking Toolkit
